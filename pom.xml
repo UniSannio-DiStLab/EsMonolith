@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.unisannio</groupId>
-    <artifactId>Esercizio</artifactId>
+    <artifactId>Monolith</artifactId>
     <packaging>war</packaging>
     <version>1.0</version>
-    <name>Esercizio</name>
+    <name>Monolith</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
