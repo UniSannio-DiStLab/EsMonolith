@@ -1,4 +1,4 @@
-package it.unisannio;
+package it.unisannio.controller;
 
 import java.io.IOException;
 import java.util.List;

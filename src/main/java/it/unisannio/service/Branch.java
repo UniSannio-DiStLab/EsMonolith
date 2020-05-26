@@ -1,4 +1,4 @@
-package it.unisannio;
+package it.unisannio.service;
 
 
 
@@ -11,7 +11,6 @@ import javax.persistence.PersistenceContext;
 
 import it.unisannio.model.Account;
 import it.unisannio.model.Customer;
-import it.unisannio.service.BranchLocal;
 
 /**
  * Session Bean implementation class Branch

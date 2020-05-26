@@ -1,7 +1,5 @@
 package it.unisannio.model;
 
-import it.unisannio.model.Account;
-
 import java.io.Serializable;
 import java.lang.String;
 import java.util.List;
