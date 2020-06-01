@@ -1,6 +1,7 @@
 package it.unisannio.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.*;
 
 /**
@@ -9,13 +10,14 @@ import javax.persistence.*;
  */
 @Entity
 @NamedQueries ({
-	@NamedQuery(name="Account.findAllPositiveAmounts", query = "SELECT a from Account a WHERE a.balance >0"),
-	@NamedQuery(name="Account.findAllCustomerAccounts", query = "SELECT a from Account a WHERE a.customer.CF = :CF")
-})		
+		@NamedQuery(name="Account.findAllPositiveAmounts", query = "SELECT a from Account a WHERE a.balance >0"),
+		@NamedQuery(name="Account.findAllCustomerAccounts", query = "SELECT a from Account a WHERE a.customer.CF = :CF")
+})
 public class Account implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id private int number;
 	private double balance;
+	private Date lastModified;
 	@ManyToOne
 	//@JoinColumn(name="customerFK")
 	private Customer customer;
@@ -23,13 +25,14 @@ public class Account implements Serializable {
 
 	public Account() {
 		super();
-	}   
+	}
 	public Account(double a) {
 		balance = a;
+		lastModified = new Date();
 	}
 	public Account(Customer c, double a) {
-		customer = c; 
-		balance = a;
+		this(a);
+		customer = c;
 	}
 	public double getBalance() {
 		return this.balance;
@@ -37,7 +40,8 @@ public class Account implements Serializable {
 
 	public void setBalance(double balance) {
 		this.balance = balance;
-	}   
+		this.lastModified = new Date();
+	}
 	public int getNumber() {
 		return this.number;
 	}
@@ -45,7 +49,7 @@ public class Account implements Serializable {
 	public void setNumber(int number) {
 		this.number = number;
 	}
-	public Customer getCustomer () { 
+	public Customer getCustomer () {
 		return customer;
 	}
 	public void setCustomer(Customer c) {
@@ -56,5 +60,11 @@ public class Account implements Serializable {
 	}
 	public void withdraw(double amount) {
 		balance -= amount;
+	}
+	public void setLastModified(Date t) {
+		lastModified = t;
+	}
+	public Date getLastModified() {
+		return lastModified;
 	}
 }
