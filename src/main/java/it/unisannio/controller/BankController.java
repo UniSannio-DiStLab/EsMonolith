@@ -3,8 +3,10 @@ package it.unisannio.controller;
 
 import java.net.URI;
 
+
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -14,7 +16,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import it.unisannio.model.Account;
@@ -38,15 +42,6 @@ public class BankController  {
 
 	}
 
-	@GET
-	public Response test() {
-		System.out.println("test");
-		try {
-			branch.getAccount(1);
-			return Response.ok().build();
-		} catch (Exception e) {return Response.status(500).build();}
-
-	}
 
 	@POST
 	@Path("/accounts/{accountId}/deposits")
@@ -67,7 +62,6 @@ public class BankController  {
 	@Path("/accounts/{accountId}/withdraws")
 	public Response withdraw(@PathParam("accountId") int accountNum, double amount) {
 		try {
-
 			branch.withdraw(accountNum, amount);
 
 			return Response.ok().build();
@@ -81,7 +75,7 @@ public class BankController  {
 	@Path("/accounts/{accountId}/")
 	public Response getBalance(@PathParam("accountId") int accountNum) {
 		Account a = branch.getAccount(accountNum);
-
+		if (a == null) return Response.status(204).build();
 		try {
 			return Response.ok(a.getBalance()).lastModified(a.getLastModified()).build();
 		} catch (Exception e) {
@@ -92,18 +86,48 @@ public class BankController  {
 	@PUT
 	@Path("accounts/{accountId}/")
 	public Response setBalance(@PathParam("accountId") int accountNum, double amount, @Context Request request) {
-
 		Account a = branch.getAccount(accountNum);
 		ResponseBuilder builder = null;
 		try {
 			builder = request.evaluatePreconditions(a.getLastModified());
 			if (builder != null) {
+				utx.begin();
 				branch.getAccount(accountNum).setBalance(amount);
+				utx.commit();
+				return builder.status(204).build();
 			}
-			return builder.status(204).build();
+			return Response.status(412).build();
+
 
 		} catch (Exception e) {
 			return builder.status(500).build();
+		}
+	}
+
+	@POST
+	@Path("accounts")
+	public Response createAccount(@QueryParam("cf") String custCF, double amount) {
+		try {
+
+			return Response.created(new URI("/accounts/"+branch.createAccount(custCF, amount))).build();
+		} catch (Exception e) {
+			return Response.status(500).build();
+		}
+	}
+
+	@POST
+	@Path("accounts/transfers")
+	public Response transfer(@QueryParam("source") int srcAccount, @QueryParam("destination") int dstAccount, double amount) {
+		try {
+			utx.begin();
+			branch.getAccount(srcAccount).withdraw(amount);
+			branch.getAccount(dstAccount).deposit(amount);
+			utx.commit();
+
+			return Response.ok().build();
+		} catch (Exception e) {
+			try { utx.rollback(); } catch (SystemException ee) {}
+			return Response.status(500).build();
 		}
 	}
 
@@ -118,11 +142,11 @@ public class BankController  {
 		}
 	}
 
+
 	@POST
 	@Path("customers")
 	@Consumes("application/json")
 	public Response createCustomer(Customer c) {
-		System.out.println(c);
 		try {
 			branch.createCustomer(c.getCF(), c.getFirstName(), c.getLastName());
 			return Response.created(new URI("/customers/"+c.getCF())).build();
@@ -131,24 +155,16 @@ public class BankController  {
 		}
 	}
 
-	@POST
-	@Path("accounts")
-	public Response createAccount(@QueryParam("cf") String custCF, double amount) {
+	@GET
+	@Path("customers/{custCF}")
+	public Response getCustomer(@PathParam("custCF") String cf) {
 		try {
-			return Response.created(new URI("/accounts/"+branch.createAccount(custCF, amount))).build();
+			Customer c = branch.getCustomer(cf);
+			if (c == null) Response.status(404).build();
+			return Response.ok(c).build();
 		} catch (Exception e) {
 			return Response.status(500).build();
 		}
 	}
 
-	@POST
-	@Path("accounts/transfers")
-	public Response transfer(@QueryParam("source") int srcAccount, @QueryParam("destination") int dstAccount, double amount) {
-		try {
-
-			return Response.ok().build();
-		} catch (Exception e) {
-			return Response.status(500).build();
-		}
-	}
 }
