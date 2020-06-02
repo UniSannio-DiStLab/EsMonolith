@@ -3,7 +3,6 @@ package it.unisannio.controller;
 
 import java.net.URI;
 
-
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.transaction.UserTransaction;
@@ -15,9 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import it.unisannio.model.Account;
@@ -70,6 +67,7 @@ public class BankController  {
 	@Path("/accounts/{accountId}/withdraws")
 	public Response withdraw(@PathParam("accountId") int accountNum, double amount) {
 		try {
+
 			branch.withdraw(accountNum, amount);
 
 			return Response.ok().build();
@@ -94,6 +92,7 @@ public class BankController  {
 	@PUT
 	@Path("accounts/{accountId}/")
 	public Response setBalance(@PathParam("accountId") int accountNum, double amount, @Context Request request) {
+
 		Account a = branch.getAccount(accountNum);
 		ResponseBuilder builder = null;
 		try {
