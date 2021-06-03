@@ -92,13 +92,13 @@ public class BankController  {
 		ResponseBuilder builder = null;
 		try {
 			builder = request.evaluatePreconditions(a.getLastModified());
-			if (builder != null) {
+			if (builder == null) {
 				utx.begin();
 				branch.getAccount(accountNum).setBalance(amount);
 				utx.commit();
-				return builder.status(204).build();
+				return Response.status(204).build();
 			}
-			return Response.status(412).build();
+			return builder.build();
 
 
 		} catch (Exception e) {
