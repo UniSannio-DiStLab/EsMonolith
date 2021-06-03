@@ -6,8 +6,11 @@ import java.util.List;
 
 import javax.ejb.Stateless;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 import it.unisannio.model.Account;
 import it.unisannio.model.Customer;
@@ -72,6 +75,7 @@ public class Branch implements BranchLocal {
 	}
 
 	public Customer getCustomer(String cf) {
-		return em.find(Customer.class, cf);
+		Customer c = em.find(Customer.class, cf);
+		return c;
 	}
 }

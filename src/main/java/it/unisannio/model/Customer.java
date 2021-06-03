@@ -1,5 +1,7 @@
 package it.unisannio.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.lang.String;
 import java.util.List;
@@ -21,6 +23,7 @@ public class Customer implements Serializable {
 	private String lastName;
 	// Not used with relational models
 	@OneToMany(mappedBy="customer", cascade=CascadeType.REMOVE, fetch=FetchType.LAZY)
+	@JsonIgnore
 	private List<Account> accounts;
 	private static final long serialVersionUID = 1L;
 

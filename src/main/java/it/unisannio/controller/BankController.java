@@ -2,11 +2,13 @@ package it.unisannio.controller;
 
 
 import java.net.URI;
+import java.util.ArrayList;
 
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.transaction.SystemException;
+import javax.transaction.Transactional;
 import javax.transaction.UserTransaction;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -72,7 +74,7 @@ public class BankController  {
 	}
 
 	@GET
-	@Path("/accounts/{accountId}/")
+	@Path("/accounts/{accountId}/balance")
 	public Response getBalance(@PathParam("accountId") int accountNum) {
 		Account a = branch.getAccount(accountNum);
 		if (a == null) return Response.status(204).build();
@@ -84,7 +86,7 @@ public class BankController  {
 	}
 
 	@PUT
-	@Path("accounts/{accountId}/")
+	@Path("accounts/{accountId}/balance")
 	public Response setBalance(@PathParam("accountId") int accountNum, double amount, @Context Request request) {
 		Account a = branch.getAccount(accountNum);
 		ResponseBuilder builder = null;
@@ -108,7 +110,6 @@ public class BankController  {
 	@Path("accounts")
 	public Response createAccount(@QueryParam("cf") String custCF, double amount) {
 		try {
-
 			return Response.created(new URI("/accounts/"+branch.createAccount(custCF, amount))).build();
 		} catch (Exception e) {
 			return Response.status(500).build();
@@ -135,7 +136,6 @@ public class BankController  {
 	@Path("customers/{custCF}/accounts")
 	public Response createAccountOfCustomer(@PathParam("custCF") String custCF, double amount) {
 		try {
-
 			return Response.created(new URI("/customers/"+custCF+"/accounts/"+branch.createAccount(custCF, amount))).build();
 		} catch (Exception e) {
 			return Response.status(500).build();
@@ -157,10 +157,12 @@ public class BankController  {
 
 	@GET
 	@Path("customers/{custCF}")
+	@Produces("application/json")
 	public Response getCustomer(@PathParam("custCF") String cf) {
 		try {
 			Customer c = branch.getCustomer(cf);
-			if (c == null) Response.status(404).build();
+			if (c == null) return Response.status(404).build();
+			c.setAccount(new ArrayList<>());
 			return Response.ok(c).build();
 		} catch (Exception e) {
 			return Response.status(500).build();
