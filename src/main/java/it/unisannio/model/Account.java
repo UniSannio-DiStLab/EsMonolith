@@ -57,9 +57,11 @@ public class Account implements Serializable {
 	}
 	public void deposit(double amount) {
 		balance += amount;
+		this.lastModified = new Date();
 	}
 	public void withdraw(double amount) {
 		balance -= amount;
+		this.lastModified = new Date();
 	}
 	public void setLastModified(Date t) {
 		lastModified = t;
