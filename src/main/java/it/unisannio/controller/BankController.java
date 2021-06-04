@@ -2,7 +2,9 @@ package it.unisannio.controller;
 
 
 import java.net.URI;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 import javax.annotation.Resource;
@@ -91,7 +93,8 @@ public class BankController  {
 		Account a = branch.getAccount(accountNum);
 		ResponseBuilder builder = null;
 		try {
-			builder = request.evaluatePreconditions(a.getLastModified());
+			//Workaround since we use Java8
+			builder = request.evaluatePreconditions(Date.from(a.getLastModified().toInstant().truncatedTo(ChronoUnit.SECONDS)));
 			if (builder == null) {
 				utx.begin();
 				branch.getAccount(accountNum).setBalance(amount);
